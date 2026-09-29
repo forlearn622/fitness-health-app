@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Fitness Profile — PulseFit</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .metric-badge-box {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1.5rem 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 0.75rem;
+      text-align: center;
+    }
+    .metric-item .val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .metric-item .lbl {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 0.2rem;
+    }
+    .disclaimer-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: #fde68a;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <a href="/" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit
+    </a>
+    <nav class="nav-links">
+      <a href="/login.html" class="btn btn-outline"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In</a>
+    </nav>
+  </header>
+
+  <!-- Register Form Card -->
+  <main class="auth-wrapper">
+    <div class="auth-card wide">
+      <div class="auth-header">
+        <div class="card-icon" style="margin: 0 auto 1rem auto;">
+          <i class="fa-solid fa-user-plus"></i>
+        </div>
+        <h2>Start Your Fitness Journey</h2>
+        <p>Enter your profile details to generate your science-backed workout and diet plan</p>
+      </div>
+
+      <form id="registerForm">
+        <!-- 1. Account Credentials -->
+        <div class="section-title">
+          <i class="fa-solid fa-shield-halved"></i> Account Credentials
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" class="form-control" placeholder="e.g. Yash Sharma" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="yash@example.com" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="password">Password (min 6 chars)</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+          </div>
+        </div>
+
+        <!-- 2. Body Information -->
+        <div class="section-title">
+          <i class="fa-solid fa-weight-scale"></i> Body & Physical Information
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="age">Age (years)</label>
+            <input type="number" id="age" class="form-control" placeholder="24" min="12" max="100" value="24" required>
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" class="form-control" required>
+              <option value="MALE" selected>Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="heightCm">Height (cm)</label>
+            <input type="number" id="heightCm" class="form-control" placeholder="175" step="0.1" value="175" required>
+          </div>
+          <div class="form-group">
+            <label for="weightKg">Current Weight (kg)</label>
+            <input type="number" id="weightKg" class="form-control" placeholder="72" step="0.1" value="72" required>
+          </div>
+          <div class="form-group">
+            <label for="targetWeightKg">Target Weight (kg)</label>
+            <input type="number" id="targetWeightKg" class="form-control" placeholder="70" step="0.1" value="70">
+          </div>
+        </div>
+
+        <!-- 3. Fitness Goal -->
+        <div class="section-title">
+          <i class="fa-solid fa-bullseye"></i> Select Your Fitness Goal
+        </div>
+        <div class="choice-grid" id="goalChoices">
+          <div class="choice-card selected" data-value="MUSCLE_GAIN">
+            <i class="fa-solid fa-dumbbell"></i>
+            <div class="choice-title">Muscle Gain</div>
+            <div class="choice-subtitle">Surplus & Hypertrophy</div>
+          </div>
+          <div class="choice-card" data-value="FAT_LOSS">
+            <i class="fa-solid fa-fire"></i>
+            <div class="choice-title">Fat Loss</div>
+            <div class="choice-subtitle">Deficit & Tone</div>
+          </div>
+          <div class="choice-card" data-value="WEIGHT_LOSS">
+            <i class="fa-solid fa-person-running"></i>
+            <div class="choice-title">Weight Loss</div>
+            <div class="choice-subtitle">Calorie Burn</div>
+          </div>
+          <div class="choice-card" data-value="MAINTENANCE">
+            <i class="fa-solid fa-scale-balanced"></i>
+            <div class="choice-title">Maintenance</div>
+            <div class="choice-subtitle">Stay Active & Fit</div>
+          </div>
+          <div class="choice-card" data-value="GENERAL_FITNESS">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <div class="choice-title">General Fitness</div>
+            <div class="choice-subtitle">Endurance & Health</div>
+          </div>
+        </div>
+        <input type="hidden" id="fitnessGoal" value="MUSCLE_GAIN">
+
+        <!-- 4. Activity Level & Experience -->
+        <div class="section-title">
+          <i class="fa-solid fa-chart-simple"></i> Activity & Experience Level
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="activityLevel">Daily Activity Level</label>
+            <select id="activityLevel" class="form-control" required>
+              <option value="SEDENTARY">Sedentary (Little/no exercise)</option>
+              <option value="LIGHTLY_ACTIVE">Lightly Active (1-3 days/week)</option>
+              <option value="MODERATELY_ACTIVE" selected>Moderately Active (3-5 days/week)</option>
+              <option value="VERY_ACTIVE">Very Active (6-7 days/week)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fitnessExperience">Workout Experience</label>
+            <select id="fitnessExperience" class="form-control" required>
+              <option value="BEGINNER" selected>Beginner (0 - 6 months)</option>
+              <option value="INTERMEDIATE">Intermediate (6 months - 2 years)</option>
+              <option value="ADVANCED">Advanced (2+ years)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Calculation Preview -->
+        <div class="metric-badge-box">
+          <div class="metric-item">
+            <div class="val" id="previewBmi">23.5</div>
+            <div class="lbl">BMI (<span id="previewBmiCat">Normal</span>)</div>
+          </div>
+          <div class="metric-item">
+            <div class="val" id="previewBmr">1,688 kcal</div>
+            <div class="lbl">Basal BMR</div>
+          </div>
+          <div class="metric-item">
+            <div class="val" id="previewTdee">2,616 kcal</div>
+            <div class="lbl">Est. TDEE</div>
+          </div>
+          <div class="metric-item">
+            <div class="val" id="previewTarget">2,916 kcal</div>
+            <div class="lbl">Daily Target</div>
+          </div>
+          <div class="metric-item">
+            <div class="val" id="previewWater">3.0 L</div>
+            <div class="lbl">Water Goal</div>
+          </div>
+        </div>
+
+        <div class="disclaimer-box">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>Calorie, nutrition, and workout recommendations are calculated estimates based on scientific models and do not replace professional medical advice.</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="registerBtn" style="width: 100%; justify-content: center; margin-top: 1.5rem; padding: 0.95rem; font-size: 1.05rem;">
+          <i class="fa-solid fa-sparkles"></i> Generate My Personalized Fitness Plan
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/login.html">Sign in here</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    // Fitness Goal Card Selection
+    const goalCards = document.querySelectorAll('#goalChoices .choice-card');
+    const goalInput = document.getElementById('fitnessGoal');
+
+    goalCards.forEach(card => {
+      card.addEventListener('click', () => {
+        goalCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        goalInput.value = card.getAttribute('data-value');
+        updateLivePreview();
+      });
+    });
+
+    // Live Calculation Update
+    function updateLivePreview() {
+      const age = parseInt(document.getElementById('age').value) || 25;
+      const gender = document.getElementById('gender').value;
+      const height = parseFloat(document.getElementById('heightCm').value) || 170;
+      const weight = parseFloat(document.getElementById('weightKg').value) || 70;
+      const activity = document.getElementById('activityLevel').value;
+      const goal = goalInput.value;
+
+      // BMI
+      const heightM = height / 100;
+      const bmi = (weight / (heightM * heightM)).toFixed(1);
+      let bmiCat = 'Normal';
+      if (bmi < 18.5) bmiCat = 'Underweight';
+      else if (bmi >= 25 && bmi < 30) bmiCat = 'Overweight';
+      else if (bmi >= 30) bmiCat = 'Obese';
+
+      // BMR (Mifflin-St Jeor)
+      let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+      bmr += (gender === 'MALE' ? 5 : (gender === 'FEMALE' ? -161 : -78));
+      bmr = Math.round(bmr);
+
+      // TDEE
+      const mult = { SEDENTARY: 1.2, LIGHTLY_ACTIVE: 1.375, MODERATELY_ACTIVE: 1.55, VERY_ACTIVE: 1.725 }[activity] || 1.2;
+      const tdee = Math.round(bmr * mult);
+
+      // Calorie Target
+      const adj = { MUSCLE_GAIN: 300, FAT_LOSS: -400, WEIGHT_LOSS: -500, MAINTENANCE: 0, GENERAL_FITNESS: 0 }[goal] || 0;
+      const targetCal = Math.max(1200, tdee + adj);
+
+      // Water Target
+      const bonus = { SEDENTARY: 0, LIGHTLY_ACTIVE: 250, MODERATELY_ACTIVE: 500, VERY_ACTIVE: 750 }[activity] || 0;
+      const waterMl = Math.max(2000, Math.round(((weight * 35) + bonus) / 250) * 250);
+
+      document.getElementById('previewBmi').textContent = bmi;
+      document.getElementById('previewBmiCat').textContent = bmiCat;
+      document.getElementById('previewBmr').textContent = bmr.toLocaleString() + ' kcal';
+      document.getElementById('previewTdee').textContent = tdee.toLocaleString() + ' kcal';
+      document.getElementById('previewTarget').textContent = targetCal.toLocaleString() + ' kcal';
+      document.getElementById('previewWater').textContent = (waterMl / 1000).toFixed(1) + ' L';
+    }
+
+    ['age', 'gender', 'heightCm', 'weightKg', 'activityLevel'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateLivePreview);
+    });
+
+    updateLivePreview();
+
+    // Form Submission
+    const registerForm = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        fullName: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        age: parseInt(document.getElementById('age').value),
+        gender: document.getElementById('gender').value,
+        heightCm: parseFloat(document.getElementById('heightCm').value),
+        weightKg: parseFloat(document.getElementById('weightKg').value),
+        targetWeightKg: parseFloat(document.getElementById('targetWeightKg').value) || parseFloat(document.getElementById('weightKg').value),
+        activityLevel: document.getElementById('activityLevel').value,
+        fitnessExperience: document.getElementById('fitnessExperience').value,
+        fitnessGoal: document.getElementById('fitnessGoal').value
+      };
+
+      registerBtn.disabled = true;
+      registerBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Plan & Setting Up Profile...';
+
+      try {
+        const response = await apiFetch('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (response.success && response.data) {
+          setAuth(response.data.token, response.data.user);
+          showToast('Account & Fitness Profile created successfully! Welcome, ' + response.data.user.fullName, 'success');
+          setTimeout(() => {
+            window.location.href = '/dashboard.html';
+          }, 1200);
+        } else {
+          showToast(response.message || 'Registration failed', 'error');
+        }
+      } catch (err) {
+        showToast(err.message || 'Registration failed. Please check your details.', 'error');
+      } finally {
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = '<i class="fa-solid fa-sparkles"></i> Generate My Personalized Fitness Plan';
+      }
+    });
+  </script>
+</body>
+</html>

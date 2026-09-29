@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout History & Analytics — PulseFit</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .history-container {
+      max-width: 1050px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: #818cf8;
+      color: #ffffff;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .history-table th {
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.8);
+      color: #94a3b8;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .history-table td {
+      padding: 1.1rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+    }
+    .history-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .badge-status {
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .badge-status.COMPLETED {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+    .badge-status.IN_PROGRESS {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+    }
+    .badge-status.NOT_STARTED {
+      background: rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Navbar -->
+  <header class="navbar">
+    <a href="/dashboard.html" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="btn btn-outline"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/workout.html" class="btn btn-outline"><i class="fa-solid fa-dumbbell"></i> Workout</a>
+      <a href="/workout-history.html" class="btn btn-primary"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <a href="/diet.html" class="btn btn-outline"><i class="fa-solid fa-bowl-food"></i> Diet</a>
+      <a href="/profile.html" class="btn btn-outline"><i class="fa-solid fa-user"></i> Profile</a>
+      <button onclick="logout()" class="btn btn-outline" style="color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </nav>
+  </header>
+
+  <main class="history-container">
+    <div style="margin-bottom: 2rem;">
+      <h1 style="font-size: 2rem; font-weight: 800;">Workout Log History</h1>
+      <p style="color: var(--text-muted); margin-top: 0.25rem;">Review your completed sessions, estimated energy burn, and consistency trends</p>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All Workouts</button>
+      <button class="filter-btn" onclick="setFilter('today', this)">Today</button>
+      <button class="filter-btn" onclick="setFilter('week', this)">Past 7 Days</button>
+      <button class="filter-btn" onclick="setFilter('month', this)">Past 30 Days</button>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card" style="padding: 0; overflow-x: auto;">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Workout Title</th>
+            <th>Exercises</th>
+            <th>Duration</th>
+            <th>Est. Burn</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading history...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (!isAuthenticated()) {
+      window.location.href = '/login.html';
+    }
+
+    let currentFilter = 'all';
+
+    async function loadHistory() {
+      const tbody = document.getElementById('historyTableBody');
+      try {
+        const url = currentFilter === 'all' ? '/api/workouts/history' : `/api/workouts/history?filter=${currentFilter}`;
+        const response = await apiFetch(url);
+
+        if (response.success && response.data) {
+          const logs = response.data;
+          if (logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No workout sessions found for this period. Start today's workout!</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = '';
+          logs.forEach(log => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><strong>${log.logDate}</strong></td>
+              <td>${log.title}</td>
+              <td>${log.completedExercises} / ${log.totalExercises} (${log.completionPercentage}%)</td>
+              <td>${log.durationMin || 0} mins</td>
+              <td><span style="color: #fbbf24; font-weight: 600;">${Math.round(log.caloriesBurned || 0)} kcal</span></td>
+              <td><span class="badge-status ${log.status}">${(log.status || '').replace('_', ' ')}</span></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 2rem;">Failed to load history: ${err.message}</td></tr>`;
+      }
+    }
+
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadHistory();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHistory);
+  </script>
+</body>
+</html>

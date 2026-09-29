@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseFit — Intelligent Fitness & Health Management</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <a href="/" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit
+      <span class="brand-badge">Full-Stack</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/login.html" class="btn btn-outline"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In</a>
+      <a href="/register.html" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Get Started</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <main class="hero">
+    <div class="hero-tag">
+      <i class="fa-solid fa-sparkles"></i> AI-Guided Health & Workout Platform
+    </div>
+    <h1 class="hero-title">
+      Transform Your Body with <span>Personalized Fitness & Nutrition</span>
+    </h1>
+    <p class="hero-subtitle">
+      Science-backed calorie targets, dynamic 7-day Indian meal plans, MET-accurate workout burn calculations, water tracking, and day-to-day milestone streaks.
+    </p>
+
+    <div class="hero-actions">
+      <a href="/register.html" class="btn btn-primary" style="padding: 0.85rem 1.8rem; font-size: 1.05rem;">
+        <i class="fa-solid fa-fire-flame-curved"></i> Start Your Journey
+      </a>
+      <a href="#features" class="btn btn-outline" style="padding: 0.85rem 1.8rem; font-size: 1.05rem;">
+        <i class="fa-solid fa-compass"></i> Explore Features
+      </a>
+    </div>
+
+    <!-- Backend Live Connection Status Card -->
+    <div class="status-pill" id="backendStatusPill">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="backendStatusText">Checking backend REST API status...</span>
+    </div>
+
+    <!-- Features Grid -->
+    <section class="features-grid" id="features">
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-dumbbell"></i></div>
+        <h3>Adaptive Workouts</h3>
+        <p>Custom exercises tailored to your goal (Muscle Gain, Fat Loss, Maintenance) and experience level with real-time MET calorie tracking.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-bowl-rice"></i></div>
+        <h3>Indian Diet & Macros</h3>
+        <p>Curated 7-day nutrition plans with authentic Indian foods (paneer, roti, dal, sprouts) balancing protein, carbs, and fats.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-glass-water"></i></div>
+        <h3>Hydration & Daily Logs</h3>
+        <p>Intuitive one-click +250ml water logger, daily weight tracking, sleep, and step counts with dynamic progress rings.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>Streaks & Analytics</h3>
+        <p>Interactive Chart.js visualizations showing weight progression over time, streak counters, and milestone achievements.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 PulseFit Health & Fitness Management Platform &bull; Built with Spring Boot, MySQL & Vanilla ES6</p>
+  </footer>
+
+  <script>
+    // Verify Backend REST API Connectivity via Fetch API
+    async function checkBackendHealth() {
+      const statusText = document.getElementById('backendStatusText');
+      const statusDot = document.getElementById('statusDot');
+      try {
+        const response = await fetch('/api/health');
+        if (response.ok) {
+          const result = await response.json();
+          statusText.textContent = `Backend Online: ${result.data.phase} (${result.data.application})`;
+          statusDot.style.background = '#10b981';
+          statusDot.style.boxShadow = '0 0 12px #10b981';
+        } else {
+          statusText.textContent = 'Backend responded with HTTP error: ' + response.status;
+          statusDot.style.background = '#f59e0b';
+        }
+      } catch (err) {
+        statusText.textContent = 'Backend offline or unreachable. Start Spring Boot on port 8080.';
+        statusDot.style.background = '#ef4444';
+        statusDot.style.boxShadow = '0 0 12px #ef4444';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', checkBackendHealth);
+  </script>
+</body>
+</html>
