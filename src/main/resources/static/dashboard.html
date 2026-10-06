@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — PulseFit Health & Fitness</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .welcome-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 0.6rem 1.2rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      color: #fbbf24;
+      font-size: 0.95rem;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      background: var(--glass);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .kpi-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+      transition: width 0.5s ease;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dash-card {
+      background: var(--glass);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .dash-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .dash-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .workout-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+    }
+
+    .macro-chart-box {
+      position: relative;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .checkin-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Navbar -->
+  <header class="navbar">
+    <a href="/dashboard.html" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="btn btn-primary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/workout.html" class="btn btn-outline"><i class="fa-solid fa-dumbbell"></i> Workout</a>
+      <a href="/diet.html" class="btn btn-outline"><i class="fa-solid fa-bowl-food"></i> Diet</a>
+      <a href="/water.html" class="btn btn-outline"><i class="fa-solid fa-glass-water"></i> Water</a>
+      <a href="/progress.html" class="btn btn-outline"><i class="fa-solid fa-chart-line"></i> Progress</a>
+      <a href="/goals.html" class="btn btn-outline"><i class="fa-solid fa-bullseye"></i> Goals</a>
+      <a href="/profile.html" class="btn btn-outline"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="/admin.html" id="adminNavLink" class="btn btn-outline" style="display: none; border-color: #f59e0b; color: #fbbf24;"><i class="fa-solid fa-shield-halved"></i> Admin</a>
+      <button onclick="logout()" class="btn btn-outline" title="Sign Out" style="color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+
+    <!-- Header & Greeting -->
+    <div class="welcome-header">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;" id="userGreeting">Welcome Back!</h1>
+        <p style="color: var(--text-muted); margin-top: 0.3rem;" id="userSubtitle">Here is your daily fitness summary and target tracker</p>
+      </div>
+      <div class="streak-badge">
+        <i class="fa-solid fa-fire-flame-curved"></i> <span id="streakDays">0</span> Day Streak
+      </div>
+    </div>
+
+    <!-- Quick Check-in Banner -->
+    <div class="checkin-banner">
+      <div>
+        <h4 style="font-weight: 700; font-size: 1.05rem;"><i class="fa-solid fa-clipboard-check" style="color: #818cf8; margin-right: 0.5rem;"></i> Daily Check-In</h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">Log your current weight, sleep, and steps to keep your metrics and calorie targets accurate.</p>
+      </div>
+      <a href="/progress.html" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.9rem;">
+        <i class="fa-solid fa-pen-to-square"></i> Log Today's Stats
+      </a>
+    </div>
+
+    <!-- 4 KPI Cards Grid -->
+    <div class="kpi-grid">
+      <!-- 1. Calories Target & Consumed -->
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-val" id="calorieBudget">0</div>
+              <div class="kpi-label">Remaining Calories</div>
+            </div>
+            <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+              <i class="fa-solid fa-utensils"></i>
+            </div>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Consumed: <span id="caloriesConsumed" style="color: #fff; font-weight: 600;">0</span> / <span id="calorieTarget">0</span> kcal
+          </div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="calorieBar" style="width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444);"></div>
+        </div>
+      </div>
+
+      <!-- 2. Calories Burned -->
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-val" id="caloriesBurned">0</div>
+              <div class="kpi-label">Active Calories Burned</div>
+            </div>
+            <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+              <i class="fa-solid fa-fire"></i>
+            </div>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Workout: <span id="workoutStatusText" style="color: #fff; font-weight: 600;">Pending</span>
+          </div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="workoutBar" style="width: 0%; background: linear-gradient(90deg, #ef4444, #f43f5e);"></div>
+        </div>
+      </div>
+
+      <!-- 3. Hydration -->
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-val" id="waterConsumed">0 <span style="font-size: 1.1rem; font-weight: 500;">ml</span></div>
+              <div class="kpi-label">Hydration Today</div>
+            </div>
+            <div class="kpi-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+              <i class="fa-solid fa-glass-water"></i>
+            </div>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Target: <span id="waterTarget" style="color: #fff; font-weight: 600;">0</span> ml (<span id="waterPercent">0</span>%)
+          </div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="waterBar" style="width: 0%; background: linear-gradient(90deg, #06b6d4, #3b82f6);"></div>
+        </div>
+      </div>
+
+      <!-- 4. Weight & BMI -->
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-val" id="currentWeight">-- <span style="font-size: 1.1rem; font-weight: 500;">kg</span></div>
+              <div class="kpi-label">Current Weight</div>
+            </div>
+            <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+              <i class="fa-solid fa-weight-scale"></i>
+            </div>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            BMI: <span id="bmiVal" style="color: #fff; font-weight: 600;">--</span> (<span id="bmiCat" style="color: #10b981;">Normal</span>)
+          </div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width: 100%; background: #10b981;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Two-Column Layout -->
+    <div class="main-grid">
+
+      <!-- Left Column: Workout Routine & Quick Actions -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Today's Workout Routine Card -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">
+              <i class="fa-solid fa-dumbbell" style="color: #818cf8;"></i>
+              <span id="workoutDayTitle">Today's Workout Routine</span>
+            </div>
+            <a href="/workout.html" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+              View Plan <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+          <div id="workoutExercisesList">
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+              <p>Loading today's exercises...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly Activity Trend (Chart.js) -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">
+              <i class="fa-solid fa-chart-column" style="color: #06b6d4;"></i>
+              <span>7-Day Calorie & Burn Trend</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Past Week</span>
+          </div>
+          <div style="height: 250px; position: relative;">
+            <canvas id="weeklyActivityChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Nutrition Breakdown & Hydration Quick Action -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+        <!-- Macronutrient Target Card -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">
+              <i class="fa-solid fa-pie-chart" style="color: #10b981;"></i>
+              <span>Macronutrient Breakdown</span>
+            </div>
+            <a href="/diet.html" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+              Diet Plan <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+          <div class="macro-chart-box">
+            <canvas id="macroDoughnutChart"></canvas>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+            <div>
+              <div style="color: #818cf8; font-weight: 700;" id="macroProtein">0g</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Protein</div>
+            </div>
+            <div>
+              <div style="color: #06b6d4; font-weight: 700;" id="macroCarbs">0g</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Carbs</div>
+            </div>
+            <div>
+              <div style="color: #f59e0b; font-weight: 700;" id="macroFat">0g</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Fats</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Water Add Card -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">
+              <i class="fa-solid fa-faucet-drip" style="color: #06b6d4;"></i>
+              <span>Quick Water Intake</span>
+            </div>
+            <a href="/water.html" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+              Tracker <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem;">Tap to quickly log water intake right from your dashboard:</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <button onclick="logQuickWater(250)" class="btn btn-outline" style="border-color: rgba(6, 182, 212, 0.4); color: #38bdf8; justify-content: center;">
+              <i class="fa-solid fa-glass-water"></i> +250 ml Glass
+            </button>
+            <button onclick="logQuickWater(500)" class="btn btn-outline" style="border-color: rgba(6, 182, 212, 0.4); color: #38bdf8; justify-content: center;">
+              <i class="fa-solid fa-bottle-water"></i> +500 ml Bottle
+            </button>
+          </div>
+        </div>
+
+        <!-- Weekly Summary Metrics -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">
+              <i class="fa-solid fa-calendar-week" style="color: #fbbf24;"></i>
+              <span>Weekly Accomplishments</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.92rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">Workouts Completed:</span>
+              <span style="font-weight: 700; color: #fff;" id="weekWorkouts">0 sessions</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">Total Calories Burned:</span>
+              <span style="font-weight: 700; color: #f87171;" id="weekBurned">0 kcal</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">Daily Avg. Intake:</span>
+              <span style="font-weight: 700; color: #fbbf24;" id="weekAvgIntake">0 kcal</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted);">Weight Change:</span>
+              <span style="font-weight: 700; color: #10b981;" id="weekWeightDelta">0.0 kg</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    let weeklyChartInstance = null;
+    let macroChartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!isAuthenticated()) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const user = getUser();
+      if (user && user.role === 'ROLE_ADMIN') {
+        const adminLink = document.getElementById('adminNavLink');
+        if (adminLink) adminLink.style.display = 'inline-flex';
+      }
+
+      await loadDashboardData();
+      await loadTodayWorkout();
+    });
+
+    async function loadDashboardData() {
+      try {
+        const res = await apiFetch('/api/progress/dashboard');
+        if (!res.success) throw new Error(res.message);
+
+        const data = res.data;
+
+        // Header
+        document.getElementById('userGreeting').textContent = `Hello, ${data.fullName || 'Athlete'}! 👋`;
+        document.getElementById('userSubtitle').textContent = `Goal: ${data.fitnessGoalDisplay || 'Fitness Mastery'} • Target Weight: ${data.targetWeightKg || '--'} kg`;
+        document.getElementById('streakDays').textContent = data.currentStreakDays || 0;
+
+        // KPI 1: Calories
+        const targetCal = data.dailyCalorieTarget || 2000;
+        const eatenCal = Math.round(data.caloriesConsumed || 0);
+        const remCal = Math.max(0, targetCal - eatenCal);
+        document.getElementById('calorieBudget').textContent = remCal;
+        document.getElementById('caloriesConsumed').textContent = eatenCal;
+        document.getElementById('calorieTarget').textContent = targetCal;
+        const calPercent = Math.min(100, Math.round((eatenCal / targetCal) * 100));
+        document.getElementById('calorieBar').style.width = `${calPercent}%`;
+
+        // KPI 2: Burned
+        const burned = Math.round(data.caloriesBurned || 0);
+        document.getElementById('caloriesBurned').textContent = burned;
+        document.getElementById('workoutStatusText').textContent = data.workoutCompleted ? 'Completed ✅' : (burned > 0 ? 'In Progress ⏳' : 'Pending ⏳');
+        document.getElementById('workoutBar').style.width = `${Math.min(100, data.workoutCompletionPercentage || 0)}%`;
+
+        // KPI 3: Water
+        const waterCons = data.waterConsumedMl || 0;
+        const waterTgt = data.waterTargetMl || 3000;
+        document.getElementById('waterConsumed').innerHTML = `${waterCons} <span style="font-size: 1.1rem; font-weight: 500;">ml</span>`;
+        document.getElementById('waterTarget').textContent = waterTgt;
+        document.getElementById('waterPercent').textContent = Math.round((waterCons / waterTgt) * 100);
+        document.getElementById('waterBar').style.width = `${Math.min(100, Math.round((waterCons / waterTgt) * 100))}%`;
+
+        // KPI 4: Weight & BMI
+        document.getElementById('currentWeight').innerHTML = `${data.currentWeightKg || '--'} <span style="font-size: 1.1rem; font-weight: 500;">kg</span>`;
+        document.getElementById('bmiVal').textContent = data.bmi || '--';
+        document.getElementById('bmiCat').textContent = data.bmiCategory || '--';
+
+        // Weekly Summary
+        document.getElementById('weekWorkouts').textContent = `${data.weeklyWorkoutsCompleted || 0} sessions`;
+        document.getElementById('weekBurned').textContent = `${data.weeklyCaloriesBurned || 0} kcal`;
+        document.getElementById('weekAvgIntake').textContent = `${data.weeklyAvgCaloriesConsumed || 0} kcal`;
+        const delta = data.weightChangeKg || 0;
+        document.getElementById('weekWeightDelta').textContent = `${delta > 0 ? '+' : ''}${delta} kg`;
+        document.getElementById('weekWeightDelta').style.color = delta <= 0 ? '#10b981' : '#f59e0b';
+
+        // Render Macro Chart
+        renderMacroChart(data.proteinTargetG || 140, targetCal);
+
+        // Render Weekly Trend Chart
+        renderWeeklyChart(data.recentProgress || []);
+
+      } catch (err) {
+        showToast(err.message || 'Error loading dashboard', 'error');
+      }
+    }
+
+    async function loadTodayWorkout() {
+      const container = document.getElementById('workoutExercisesList');
+      try {
+        const res = await apiFetch('/api/workouts/today');
+        if (!res.success) throw new Error(res.message);
+
+        const workout = res.data;
+        if (!workout) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; margin-bottom: 0.5rem; color: #818cf8;"></i>
+              <p>No active workout plan found.</p>
+              <a href="/workout.html" class="btn btn-primary" style="margin-top: 1rem;">Generate 7-Day Plan</a>
+            </div>
+          `;
+          return;
+        }
+
+        document.getElementById('workoutDayTitle').textContent = `${workout.title} (${workout.focusArea || 'Fitness'})`;
+
+        if (workout.isRestDay) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #10b981;">
+              <i class="fa-solid fa-mug-hot" style="font-size: 2.5rem; margin-bottom: 0.5rem;"></i>
+              <h3>Rest & Recovery Day</h3>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Muscle repair happens during rest. Hydrate and get 7-8 hours of sleep!</p>
+            </div>
+          `;
+          return;
+        }
+
+        if (!workout.exercises || workout.exercises.length === 0) {
+          container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">No exercises scheduled for today.</p>`;
+          return;
+        }
+
+        let html = '';
+        workout.exercises.forEach((ex, idx) => {
+          const isDone = ex.status === 'COMPLETED';
+          html += `
+            <div class="workout-item">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-weight: 700; color: #818cf8; width: 20px;">#${idx + 1}</span>
+                <div>
+                  <div style="font-weight: 600; color: ${isDone ? '#10b981' : '#f8fafc'}; text-decoration: ${isDone ? 'line-through' : 'none'};">
+                    ${ex.exerciseName}
+                  </div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">
+                    ${ex.targetSets} sets × ${ex.targetReps} reps • ${ex.estimatedCaloriesBurned || 0} kcal
+                  </div>
+                </div>
+              </div>
+              <span class="badge" style="background: ${isDone ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.08)'}; color: ${isDone ? '#10b981' : '#94a3b8'};">
+                ${isDone ? '<i class="fa-solid fa-check"></i> Done' : 'Pending'}
+              </span>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+
+      } catch (err) {
+        container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">Visit the <a href="/workout.html" style="color: #818cf8;">Workout section</a> to generate and start your workout plan.</p>`;
+      }
+    }
+
+    function renderMacroChart(proteinGrams, totalCalories) {
+      const proteinCalories = proteinGrams * 4;
+      const fatCalories = Math.round(totalCalories * 0.25);
+      const fatGrams = Math.round(fatCalories / 9);
+      const carbCalories = Math.max(0, totalCalories - proteinCalories - fatCalories);
+      const carbGrams = Math.round(carbCalories / 4);
+
+      document.getElementById('macroProtein').textContent = `${proteinGrams}g`;
+      document.getElementById('macroCarbs').textContent = `${carbGrams}g`;
+      document.getElementById('macroFat').textContent = `${fatGrams}g`;
+
+      const ctx = document.getElementById('macroDoughnutChart').getContext('2d');
+      if (macroChartInstance) macroChartInstance.destroy();
+
+      macroChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Protein', 'Carbs', 'Fat'],
+          datasets: [{
+            data: [proteinCalories, carbCalories, fatCalories],
+            backgroundColor: ['#818cf8', '#06b6d4', '#f59e0b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(item) {
+                  return `${item.label}: ${item.raw} kcal`;
+                }
+              }
+            }
+          },
+          cutout: '72%'
+        }
+      });
+    }
+
+    function renderWeeklyChart(history) {
+      const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
+      if (weeklyChartInstance) weeklyChartInstance.destroy();
+
+      // Ensure 7 days represented
+      const days = [];
+      const caloriesBurnedData = [];
+      const caloriesConsumedData = [];
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+        days.push(dayLabel);
+
+        const rec = history.find(h => h.logDate === dateStr);
+        caloriesBurnedData.push(rec ? (rec.caloriesBurned || 0) : 0);
+        caloriesConsumedData.push(rec ? (rec.caloriesConsumed || 0) : 0);
+      }
+
+      weeklyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [
+            {
+              label: 'Burned (kcal)',
+              data: caloriesBurnedData,
+              backgroundColor: 'rgba(239, 68, 68, 0.7)',
+              borderRadius: 6
+            },
+            {
+              label: 'Consumed (kcal)',
+              data: caloriesConsumedData,
+              backgroundColor: 'rgba(99, 102, 241, 0.7)',
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8' }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    async function logQuickWater(amount) {
+      try {
+        const res = await apiFetch('/api/water/log', {
+          method: 'POST',
+          body: JSON.stringify({ amountMl: amount })
+        });
+        if (!res.success) throw new Error(res.message);
+        showToast(`+${amount} ml logged! Hydration on track! 💧`, 'success');
+        await loadDashboardData();
+      } catch (err) {
+        showToast(err.message || 'Error logging water', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -5,6 +5,10 @@ import com.example.fitnessapp.entity.Food;
 import com.example.fitnessapp.enums.FitnessExperience;
 import com.example.fitnessapp.repository.ExerciseRepository;
 import com.example.fitnessapp.repository.FoodRepository;
+import com.example.fitnessapp.entity.User;
+import com.example.fitnessapp.enums.Role;
+import com.example.fitnessapp.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -19,16 +23,34 @@ public class DataInitializer implements CommandLineRunner {
 
     private final ExerciseRepository exerciseRepository;
     private final FoodRepository foodRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(ExerciseRepository exerciseRepository, FoodRepository foodRepository) {
+    public DataInitializer(
+            ExerciseRepository exerciseRepository,
+            FoodRepository foodRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         this.exerciseRepository = exerciseRepository;
         this.foodRepository = foodRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) {
+        seedAdminUser();
         seedExercises();
         seedIndianFoods();
+    }
+
+    private void seedAdminUser() {
+        if (!userRepository.existsByEmail("admin@fitness.com")) {
+            User admin = new User("admin@fitness.com", passwordEncoder.encode("Admin@123"), "System Administrator", Role.ROLE_ADMIN);
+            userRepository.save(admin);
+            logger.info("Default administrator account created: admin@fitness.com / Admin@123");
+        }
     }
 
     private void seedExercises() {

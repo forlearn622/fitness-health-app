@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food & Calorie Tracker — PulseFit</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .foodlog-container {
+      max-width: 1050px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .macro-tracker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .macro-ring-card {
+      background: var(--glass);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .ring-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+    .ring-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .logged-meal-group {
+      background: var(--glass);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .logged-meal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+    .log-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+    }
+    .log-item-row:last-child {
+      border-bottom: none;
+    }
+    .delete-log-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+    .delete-log-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Navbar -->
+  <header class="navbar">
+    <a href="/dashboard.html" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="btn btn-outline"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/workout.html" class="btn btn-outline"><i class="fa-solid fa-dumbbell"></i> Workout</a>
+      <a href="/diet.html" class="btn btn-outline"><i class="fa-solid fa-bowl-food"></i> Diet Plan</a>
+      <a href="/food-log.html" class="btn btn-primary"><i class="fa-solid fa-utensils"></i> Track Meals</a>
+      <a href="/water.html" class="btn btn-outline"><i class="fa-solid fa-glass-water"></i> Water</a>
+      <a href="/progress.html" class="btn btn-outline"><i class="fa-solid fa-chart-line"></i> Progress</a>
+      <a href="/goals.html" class="btn btn-outline"><i class="fa-solid fa-bullseye"></i> Goals</a>
+      <a href="/profile.html" class="btn btn-outline"><i class="fa-solid fa-user"></i> Profile</a>
+      <button onclick="logout()" class="btn btn-outline" style="color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </nav>
+  </header>
+
+  <main class="foodlog-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">Food & Calorie Tracker</h1>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">Record your actual food intake and monitor calories vs your daily target</p>
+      </div>
+      <div>
+        <input type="date" id="selectedDate" class="form-control" style="width: auto;">
+      </div>
+    </div>
+
+    <!-- Live Calorie & Macro Balance Cards -->
+    <div class="macro-tracker-grid">
+      <!-- Calories Card -->
+      <div class="macro-ring-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #fbbf24;"><i class="fa-solid fa-fire"></i> Calories</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Target: <strong id="lblTargetCal">--</strong></span>
+        </div>
+        <div class="ring-val" id="lblRemainingCal">-- kcal</div>
+        <div class="ring-sub"><span id="lblConsumedCal">--</span> consumed &bull; Remaining</div>
+        <div style="background: rgba(15, 23, 42, 0.7); height: 6px; border-radius: 9999px; margin-top: 0.75rem; overflow: hidden;">
+          <div id="barCal" style="background: #fbbf24; height: 100%; width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Protein Card -->
+      <div class="macro-ring-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #38bdf8;"><i class="fa-solid fa-egg"></i> Protein</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Target: <strong id="lblTargetPro">--</strong>g</span>
+        </div>
+        <div class="ring-val" id="lblRemainingPro">-- g</div>
+        <div class="ring-sub"><span id="lblConsumedPro">--</span>g consumed &bull; Remaining</div>
+        <div style="background: rgba(15, 23, 42, 0.7); height: 6px; border-radius: 9999px; margin-top: 0.75rem; overflow: hidden;">
+          <div id="barPro" style="background: #38bdf8; height: 100%; width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Carbs Card -->
+      <div class="macro-ring-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #34d399;"><i class="fa-solid fa-wheat-awn"></i> Carbs</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Target: <strong id="lblTargetCarb">--</strong>g</span>
+        </div>
+        <div class="ring-val" id="lblRemainingCarb">-- g</div>
+        <div class="ring-sub"><span id="lblConsumedCarb">--</span>g consumed &bull; Remaining</div>
+        <div style="background: rgba(15, 23, 42, 0.7); height: 6px; border-radius: 9999px; margin-top: 0.75rem; overflow: hidden;">
+          <div id="barCarb" style="background: #34d399; height: 100%; width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Fats Card -->
+      <div class="macro-ring-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #f59e0b;"><i class="fa-solid fa-droplet"></i> Fats</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Target: <strong id="lblTargetFat">--</strong>g</span>
+        </div>
+        <div class="ring-val" id="lblRemainingFat">-- g</div>
+        <div class="ring-sub"><span id="lblConsumedFat">--</span>g consumed &bull; Remaining</div>
+        <div style="background: rgba(15, 23, 42, 0.7); height: 6px; border-radius: 9999px; margin-top: 0.75rem; overflow: hidden;">
+          <div id="barFat" style="background: #f59e0b; height: 100%; width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Log Food Card -->
+    <div class="card" style="margin-bottom: 2rem;">
+      <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+        <i class="fa-solid fa-circle-plus" style="color: #818cf8;"></i> Log a Food or Meal
+      </h3>
+
+      <form id="foodLogForm">
+        <div class="form-row">
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="foodSelect">Select Food Item (Indian & Global Library)</label>
+            <select id="foodSelect" class="form-control">
+              <option value="">-- Choose from Database or Enter Custom Below --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="mealTypeSelect">Meal Slot</label>
+            <select id="mealTypeSelect" class="form-control" required>
+              <option value="BREAKFAST">Breakfast</option>
+              <option value="MORNING_SNACK">Morning Snack</option>
+              <option value="LUNCH" selected>Lunch</option>
+              <option value="EVENING_SNACK">Evening Snack</option>
+              <option value="DINNER">Dinner</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="foodName">Food Name</label>
+            <input type="text" id="foodName" class="form-control" placeholder="e.g. Whole Wheat Roti" required>
+          </div>
+          <div class="form-group">
+            <label for="quantity">Quantity / Serving</label>
+            <input type="number" id="quantity" class="form-control" step="0.1" value="100" required>
+          </div>
+          <div class="form-group">
+            <label for="unit">Unit</label>
+            <input type="text" id="unit" class="form-control" value="g" required>
+          </div>
+          <div class="form-group">
+            <label for="calories">Calories (kcal)</label>
+            <input type="number" id="calories" class="form-control" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="protein">Protein (g)</label>
+            <input type="number" id="protein" class="form-control" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="carbs">Carbs (g)</label>
+            <input type="number" id="carbs" class="form-control" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="fat">Fat (g)</label>
+            <input type="number" id="fat" class="form-control" step="0.1" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btnLogMeal" style="margin-top: 0.5rem; padding: 0.75rem 1.6rem;">
+          <i class="fa-solid fa-plus"></i> Add to Daily Log
+        </button>
+      </form>
+    </div>
+
+    <!-- Today's Logged Items Section -->
+    <div id="loggedItemsContainer">
+      <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-clock-rotate-left" style="color: #818cf8;"></i> Logged Meals For This Date
+      </h3>
+      <div id="mealGroupsList">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (!isAuthenticated()) {
+      window.location.href = '/login.html';
+    }
+
+    let foodCatalog = [];
+    const dateInput = document.getElementById('selectedDate');
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    dateInput.addEventListener('change', loadDailySummary);
+
+    async function loadCatalog() {
+      try {
+        const response = await apiFetch('/api/foods');
+        if (response.success && response.data) {
+          foodCatalog = response.data;
+          const select = document.getElementById('foodSelect');
+          foodCatalog.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = `${f.name} (${f.servingSize} ${f.servingUnit} - ${Math.round(f.calories)} kcal, ${f.protein}g Pro)`;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById('foodSelect').addEventListener('change', (e) => {
+      const selectedId = parseInt(e.target.value);
+      if (!selectedId) return;
+
+      const f = foodCatalog.find(item => item.id === selectedId);
+      if (f) {
+        document.getElementById('foodName').value = f.name;
+        document.getElementById('quantity').value = f.servingSize;
+        document.getElementById('unit').value = f.servingUnit;
+        document.getElementById('calories').value = f.calories;
+        document.getElementById('protein').value = f.protein;
+        document.getElementById('carbs').value = f.carbs;
+        document.getElementById('fat').value = f.fat;
+      }
+    });
+
+    // Auto recalculate macros when quantity changes for selected catalog food
+    document.getElementById('quantity').addEventListener('input', () => {
+      const selectedId = parseInt(document.getElementById('foodSelect').value);
+      if (!selectedId) return;
+      const f = foodCatalog.find(item => item.id === selectedId);
+      if (f && f.servingSize > 0) {
+        const qty = parseFloat(document.getElementById('quantity').value) || 0;
+        const ratio = qty / f.servingSize;
+        document.getElementById('calories').value = (f.calories * ratio).toFixed(1);
+        document.getElementById('protein').value = (f.protein * ratio).toFixed(1);
+        document.getElementById('carbs').value = (f.carbs * ratio).toFixed(1);
+        document.getElementById('fat').value = (f.fat * ratio).toFixed(1);
+      }
+    });
+
+    async function loadDailySummary() {
+      const date = dateInput.value;
+      try {
+        const response = await apiFetch(`/api/diet/summary?date=${date}`);
+        if (response.success && response.data) {
+          renderSummary(response.data);
+        }
+      } catch (err) {
+        showToast('Failed to load food summary: ' + err.message, 'error');
+      }
+    }
+
+    function renderSummary(s) {
+      document.getElementById('lblTargetCal').textContent = s.calorieTarget + ' kcal';
+      document.getElementById('lblConsumedCal').textContent = Math.round(s.caloriesConsumed);
+      document.getElementById('lblRemainingCal').textContent = Math.round(s.remainingCalories) + ' kcal';
+      const calPercent = Math.min(100, Math.round((s.caloriesConsumed / (s.calorieTarget || 1)) * 100));
+      document.getElementById('barCal').style.width = calPercent + '%';
+
+      document.getElementById('lblTargetPro').textContent = s.proteinTargetG;
+      document.getElementById('lblConsumedPro').textContent = Math.round(s.proteinConsumed);
+      document.getElementById('lblRemainingPro').textContent = Math.round(s.remainingProtein) + 'g';
+      const proPercent = Math.min(100, Math.round((s.proteinConsumed / (s.proteinTargetG || 1)) * 100));
+      document.getElementById('barPro').style.width = proPercent + '%';
+
+      document.getElementById('lblTargetCarb').textContent = s.carbsTargetG;
+      document.getElementById('lblConsumedCarb').textContent = Math.round(s.carbsConsumed);
+      document.getElementById('lblRemainingCarb').textContent = Math.round(s.remainingCarbs) + 'g';
+      const carbPercent = Math.min(100, Math.round((s.carbsConsumed / (s.carbsTargetG || 1)) * 100));
+      document.getElementById('barCarb').style.width = carbPercent + '%';
+
+      document.getElementById('lblTargetFat').textContent = s.fatTargetG;
+      document.getElementById('lblConsumedFat').textContent = Math.round(s.fatConsumed);
+      document.getElementById('lblRemainingFat').textContent = Math.round(s.remainingFat) + 'g';
+      const fatPercent = Math.min(100, Math.round((s.fatConsumed / (s.fatTargetG || 1)) * 100));
+      document.getElementById('barFat').style.width = fatPercent + '%';
+
+      // Group logged foods by meal
+      const listContainer = document.getElementById('mealGroupsList');
+      listContainer.innerHTML = '';
+
+      if (!s.loggedFoods || s.loggedFoods.length === 0) {
+        listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2.5rem; background: var(--glass); border-radius: 16px;">No foods logged for this date yet. Use the form above to log your meals!</div>`;
+        return;
+      }
+
+      const mealOrder = ['BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'EVENING_SNACK', 'DINNER'];
+      const mealDisplayMap = {
+        BREAKFAST: 'Breakfast',
+        MORNING_SNACK: 'Morning Snack',
+        LUNCH: 'Lunch',
+        EVENING_SNACK: 'Evening Snack',
+        DINNER: 'Dinner'
+      };
+
+      mealOrder.forEach(mType => {
+        const items = s.loggedFoods.filter(f => f.mealType === mType);
+        if (items.length > 0) {
+          const groupCard = document.createElement('div');
+          groupCard.className = 'logged-meal-group';
+
+          const groupCal = items.reduce((acc, cur) => acc + cur.calories, 0);
+          const groupPro = items.reduce((acc, cur) => acc + cur.protein, 0);
+
+          let rowsHtml = '';
+          items.forEach(item => {
+            rowsHtml += `
+              <div class="log-item-row">
+                <div>
+                  <strong>${item.foodName}</strong>
+                  <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.5rem;">(${item.quantity} ${item.unit})</span>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                  <span style="color: #fbbf24; font-weight: 600;">${Math.round(item.calories)} kcal</span>
+                  <span style="color: #38bdf8; font-size: 0.82rem;">${Math.round(item.protein)}g P</span>
+                  <button class="delete-log-btn" onclick="deleteFoodLogItem(${item.id})" title="Delete food log">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+
+          groupCard.innerHTML = `
+            <div class="logged-meal-header">
+              <span>${mealDisplayMap[mType]}</span>
+              <span style="font-size: 0.85rem; color: #fbbf24;">${Math.round(groupCal)} kcal &bull; <span style="color: #38bdf8;">${Math.round(groupPro)}g Pro</span></span>
+            </div>
+            <div>${rowsHtml}</div>
+          `;
+          listContainer.appendChild(groupCard);
+        }
+      });
+    }
+
+    document.getElementById('foodLogForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnLogMeal');
+      btn.disabled = true;
+
+      const payload = {
+        foodId: parseInt(document.getElementById('foodSelect').value) || null,
+        foodName: document.getElementById('foodName').value.trim(),
+        mealType: document.getElementById('mealTypeSelect').value,
+        quantity: parseFloat(document.getElementById('quantity').value),
+        unit: document.getElementById('unit').value.trim(),
+        calories: parseFloat(document.getElementById('calories').value),
+        protein: parseFloat(document.getElementById('protein').value),
+        carbs: parseFloat(document.getElementById('carbs').value),
+        fat: parseFloat(document.getElementById('fat').value),
+        logDate: dateInput.value
+      };
+
+      try {
+        const response = await apiFetch('/api/diet/log', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (response.success) {
+          showToast('Food logged successfully!', 'success');
+          loadDailySummary();
+          document.getElementById('foodSelect').value = '';
+          document.getElementById('foodName').value = '';
+          document.getElementById('calories').value = '';
+          document.getElementById('protein').value = '';
+          document.getElementById('carbs').value = '';
+          document.getElementById('fat').value = '';
+        }
+      } catch (err) {
+        showToast('Error logging food: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function deleteFoodLogItem(logId) {
+      if (!confirm('Are you sure you want to remove this logged food?')) return;
+      try {
+        const response = await apiFetch(`/api/diet/log/${logId}`, { method: 'DELETE' });
+        if (response.success) {
+          showToast('Logged item deleted', 'info');
+          loadDailySummary();
+        }
+      } catch (err) {
+        showToast('Error deleting log: ' + err.message, 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCatalog();
+      loadDailySummary();
+    });
+  </script>
+</body>
+</html>

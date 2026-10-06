@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7-Day Indian Diet Plan — PulseFit</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .diet-container {
+      max-width: 1050px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .day-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .day-tab {
+      padding: 0.65rem 1.25rem;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .day-tab.active, .day-tab:hover {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: #818cf8;
+      color: #ffffff;
+    }
+    .meal-slot-card {
+      background: var(--glass);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .meal-slot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .food-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+    }
+    .food-item-row:last-child {
+      border-bottom: none;
+    }
+    .macro-pill {
+      font-size: 0.78rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Navbar -->
+  <header class="navbar">
+    <a href="/dashboard.html" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="btn btn-outline"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/workout.html" class="btn btn-outline"><i class="fa-solid fa-dumbbell"></i> Workout</a>
+      <a href="/diet.html" class="btn btn-primary"><i class="fa-solid fa-bowl-food"></i> Diet Plan</a>
+      <a href="/food-log.html" class="btn btn-outline"><i class="fa-solid fa-utensils"></i> Track Meals</a>
+      <a href="/water.html" class="btn btn-outline"><i class="fa-solid fa-glass-water"></i> Water</a>
+      <a href="/progress.html" class="btn btn-outline"><i class="fa-solid fa-chart-line"></i> Progress</a>
+      <a href="/goals.html" class="btn btn-outline"><i class="fa-solid fa-bullseye"></i> Goals</a>
+      <a href="/profile.html" class="btn btn-outline"><i class="fa-solid fa-user"></i> Profile</a>
+      <button onclick="logout()" class="btn btn-outline" style="color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </nav>
+  </header>
+
+  <main class="diet-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">7-Day Personalized Diet Plan</h1>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">Authentic Indian foods calibrated to your daily calorie target and protein requirement</p>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-outline" onclick="regeneratePlan()"><i class="fa-solid fa-arrows-rotate"></i> Regenerate Plan</button>
+        <a href="/food-log.html" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Log Today's Meal</a>
+      </div>
+    </div>
+
+    <!-- Day Navigation Tabs (Mon - Sun) -->
+    <div class="day-tabs" id="dayTabs">
+      <button class="day-tab active" data-day="1">Monday</button>
+      <button class="day-tab" data-day="2">Tuesday</button>
+      <button class="day-tab" data-day="3">Wednesday</button>
+      <button class="day-tab" data-day="4">Thursday</button>
+      <button class="day-tab" data-day="5">Friday</button>
+      <button class="day-tab" data-day="6">Saturday</button>
+      <button class="day-tab" data-day="7">Sunday</button>
+    </div>
+
+    <!-- Day Totals Card -->
+    <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(30, 27, 75, 0.8), rgba(15, 23, 42, 0.8));">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h3 id="selectedDayTitle" style="font-size: 1.25rem; font-weight: 700;">Monday Daily Macro Target</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Calculated aggregate nutrition for this day</p>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div style="text-align: center;">
+            <div style="font-size: 1.3rem; font-weight: 800; color: #fbbf24;" id="dayCalories">-- kcal</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Calories</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 1.3rem; font-weight: 800; color: #38bdf8;" id="dayProtein">-- g</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Protein</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 1.3rem; font-weight: 800; color: #34d399;" id="dayCarbs">-- g</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Carbs</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 1.3rem; font-weight: 800; color: #f59e0b;" id="dayFat">-- g</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Fats</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meals Container -->
+    <div id="mealsContainer">
+      <!-- Meals rendered dynamically -->
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (!isAuthenticated()) {
+      window.location.href = '/login.html';
+    }
+
+    let activePlan = null;
+    let selectedDayOfWeek = 1;
+
+    async function loadDietPlan() {
+      try {
+        const response = await apiFetch('/api/diet/plan');
+        if (response.success && response.data) {
+          activePlan = response.data;
+          // Default to today's day of week
+          const today = new Date().getDay(); // 0 is Sun, 1 is Mon
+          selectedDayOfWeek = today === 0 ? 7 : today;
+          setActiveTab(selectedDayOfWeek);
+          renderSelectedDay();
+        }
+      } catch (err) {
+        showToast('Failed to load diet plan: ' + err.message, 'error');
+      }
+    }
+
+    function setActiveTab(dayNum) {
+      selectedDayOfWeek = dayNum;
+      document.querySelectorAll('.day-tab').forEach(tab => {
+        if (parseInt(tab.getAttribute('data-day')) === dayNum) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+    }
+
+    document.querySelectorAll('.day-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        setActiveTab(parseInt(tab.getAttribute('data-day')));
+        renderSelectedDay();
+      });
+    });
+
+    function renderSelectedDay() {
+      if (!activePlan || !activePlan.days) return;
+
+      const dayData = activePlan.days.find(d => d.dayOfWeek === selectedDayOfWeek) || activePlan.days[0];
+      if (!dayData) return;
+
+      document.getElementById('selectedDayTitle').textContent = `${dayData.dayName} Daily Target`;
+      document.getElementById('dayCalories').textContent = Math.round(dayData.totalCalories) + ' kcal';
+      document.getElementById('dayProtein').textContent = Math.round(dayData.totalProtein) + ' g';
+      document.getElementById('dayCarbs').textContent = Math.round(dayData.totalCarbs) + ' g';
+      document.getElementById('dayFat').textContent = Math.round(dayData.totalFat) + ' g';
+
+      const mealsContainer = document.getElementById('mealsContainer');
+      mealsContainer.innerHTML = '';
+
+      const iconMap = {
+        BREAKFAST: 'fa-mug-hot',
+        MORNING_SNACK: 'fa-apple-whole',
+        LUNCH: 'fa-bowl-rice',
+        EVENING_SNACK: 'fa-cookie',
+        DINNER: 'fa-utensils'
+      };
+
+      dayData.meals.forEach(meal => {
+        const card = document.createElement('div');
+        card.className = 'meal-slot-card';
+
+        let foodsHtml = '';
+        (meal.foods || []).forEach(f => {
+          foodsHtml += `
+            <div class="food-item-row">
+              <div>
+                <strong>${f.foodName}</strong>
+                <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.5rem;">(${Math.round(f.quantity)} ${f.unit})</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span class="macro-pill" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">${Math.round(f.calories)} kcal</span>
+                <span class="macro-pill" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">P: ${Math.round(f.protein)}g</span>
+                <span class="macro-pill" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">C: ${Math.round(f.carbs)}g</span>
+                <span class="macro-pill" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">F: ${Math.round(f.fat)}g</span>
+              </div>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="meal-slot-header">
+            <h4 style="font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fa-solid ${iconMap[meal.mealType] || 'fa-utensils'}" style="color: #818cf8;"></i>
+              ${meal.mealTypeDisplay}
+            </h4>
+            <div style="font-size: 0.9rem; color: #fbbf24; font-weight: 700;">
+              ${Math.round(meal.totalCalories)} kcal &bull; <span style="color: #38bdf8;">${Math.round(meal.totalProtein)}g Pro</span>
+            </div>
+          </div>
+          <div>${foodsHtml}</div>
+        `;
+
+        mealsContainer.appendChild(card);
+      });
+    }
+
+    async function regeneratePlan() {
+      if (!confirm("Regenerate your 7-day personalized diet plan based on your current calorie targets?")) return;
+      try {
+        const response = await apiFetch('/api/diet/generate', { method: 'POST' });
+        if (response.success && response.data) {
+          activePlan = response.data;
+          showToast('New 7-Day Indian Diet Plan generated successfully!', 'success');
+          renderSelectedDay();
+        }
+      } catch (err) {
+        showToast('Error generating plan: ' + err.message, 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDietPlan);
+  </script>
+</body>
+</html>

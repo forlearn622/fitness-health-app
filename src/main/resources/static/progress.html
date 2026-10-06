@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress & Analytics — PulseFit</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .progress-container {
+      max-width: 1150px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--glass);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .chart-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.75rem;
+    }
+
+    .chart-box {
+      position: relative;
+      height: 280px;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .history-table th {
+      text-align: left;
+      padding: 0.85rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-table td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <a href="/dashboard.html" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="btn btn-outline"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/workout.html" class="btn btn-outline"><i class="fa-solid fa-dumbbell"></i> Workout</a>
+      <a href="/diet.html" class="btn btn-outline"><i class="fa-solid fa-bowl-food"></i> Diet</a>
+      <a href="/water.html" class="btn btn-outline"><i class="fa-solid fa-glass-water"></i> Water</a>
+      <a href="/progress.html" class="btn btn-primary"><i class="fa-solid fa-chart-line"></i> Progress</a>
+      <a href="/goals.html" class="btn btn-outline"><i class="fa-solid fa-bullseye"></i> Goals</a>
+      <a href="/profile.html" class="btn btn-outline"><i class="fa-solid fa-user"></i> Profile</a>
+      <button onclick="logout()" class="btn btn-outline" style="color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </nav>
+  </header>
+
+  <main class="progress-container">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;"><i class="fa-solid fa-chart-line" style="color: #818cf8;"></i> Body Progress & Trends</h1>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">Monitor your weight trajectory, calorie surplus/deficit, sleep quality, and daily steps</p>
+      </div>
+      <div>
+        <button onclick="document.getElementById('checkinCard').scrollIntoView({ behavior: 'smooth' })" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> Record Today's Stats
+        </button>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="analytics-grid">
+
+      <!-- Chart 1: Weight Progression -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h3 style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-weight-scale" style="color: #10b981;"></i> Weight Trajectory (kg)
+          </h3>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Last 30 Days</span>
+        </div>
+        <div class="chart-box">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Calorie Balance -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h3 style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-fire" style="color: #f59e0b;"></i> Energy Balance (kcal)
+          </h3>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Consumed vs Burned</span>
+        </div>
+        <div class="chart-box">
+          <canvas id="caloriesChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Daily Check-in Form Card -->
+    <div id="checkinCard" class="card" style="background: var(--glass); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 2rem;">
+      <h3 style="font-weight: 700; font-size: 1.2rem; margin-bottom: 0.5rem;">
+        <i class="fa-solid fa-pen-to-square" style="color: #818cf8; margin-right: 0.5rem;"></i> Daily Body Metrics Check-In
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">
+        Entering today's weight automatically updates your BMI, BMR, and recommended daily calorie targets in real-time.
+      </p>
+
+      <form id="progressForm" onsubmit="handleProgressSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="logDate">Date</label>
+            <input type="date" id="logDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="weightKg">Weight (kg)</label>
+            <input type="number" step="0.1" id="weightKg" class="form-control" placeholder="e.g. 71.5" min="30" max="300">
+          </div>
+          <div class="form-group">
+            <label for="sleepHours">Sleep (Hours)</label>
+            <input type="number" step="0.5" id="sleepHours" class="form-control" placeholder="e.g. 7.5" min="0" max="24">
+          </div>
+          <div class="form-group">
+            <label for="stepsCount">Steps Count</label>
+            <input type="number" id="stepsCount" class="form-control" placeholder="e.g. 8500" min="0" max="100000">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes / Observations</label>
+          <input type="text" id="notes" class="form-control" placeholder="e.g. Felt energized today, drank 3.5L water, hit personal record on bench press.">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary" id="saveProgressBtn">
+            <i class="fa-solid fa-floppy-disk"></i> Save Metrics
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Historical Table -->
+    <div class="card" style="background: var(--glass); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.75rem;">
+      <h3 style="font-weight: 700; font-size: 1.2rem; margin-bottom: 0.5rem;">
+        <i class="fa-solid fa-table" style="color: #06b6d4; margin-right: 0.5rem;"></i> Progress Log History
+      </h3>
+      <div style="overflow-x: auto;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Weight</th>
+              <th>Calories In</th>
+              <th>Calories Burned</th>
+              <th>Hydration</th>
+              <th>Sleep</th>
+              <th>Steps</th>
+              <th>Workout</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading history...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    let weightChartInstance = null;
+    let caloriesChartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!isAuthenticated()) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      // Default date to today
+      document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+
+      await loadProgressData();
+    });
+
+    async function loadProgressData() {
+      try {
+        const res = await apiFetch('/api/progress/history?days=30');
+        if (!res.success) throw new Error(res.message);
+
+        const history = res.data || [];
+        renderWeightChart(history);
+        renderCaloriesChart(history);
+        renderHistoryTable(history);
+
+        // Prefill today's stats if already present
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayRec = history.find(h => h.logDate === todayStr);
+        if (todayRec) {
+          if (todayRec.weightKg) document.getElementById('weightKg').value = todayRec.weightKg;
+          if (todayRec.sleepHours) document.getElementById('sleepHours').value = todayRec.sleepHours;
+          if (todayRec.stepsCount) document.getElementById('stepsCount').value = todayRec.stepsCount;
+          if (todayRec.notes) document.getElementById('notes').value = todayRec.notes;
+        }
+
+      } catch (err) {
+        showToast(err.message || 'Error loading progress data', 'error');
+      }
+    }
+
+    function renderWeightChart(history) {
+      const validPoints = history.filter(h => h.weightKg && h.weightKg > 0);
+      const labels = validPoints.map(h => h.logDate);
+      const data = validPoints.map(h => h.weightKg);
+
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      if (weightChartInstance) weightChartInstance.destroy();
+
+      weightChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length > 0 ? labels : ['No data yet'],
+          datasets: [{
+            label: 'Body Weight (kg)',
+            data: data.length > 0 ? data : [0],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#10b981',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8' },
+              grid: { display: false }
+            },
+            y: {
+              ticks: { color: '#94a3b8' },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCaloriesChart(history) {
+      const labels = history.map(h => h.logDate);
+      const burned = history.map(h => h.caloriesBurned || 0);
+      const consumed = history.map(h => h.caloriesConsumed || 0);
+
+      const ctx = document.getElementById('caloriesChart').getContext('2d');
+      if (caloriesChartInstance) caloriesChartInstance.destroy();
+
+      caloriesChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length > 0 ? labels : ['No data yet'],
+          datasets: [
+            {
+              label: 'Burned (kcal)',
+              data: burned.length > 0 ? burned : [0],
+              backgroundColor: 'rgba(239, 68, 68, 0.75)',
+              borderRadius: 4
+            },
+            {
+              label: 'Consumed (kcal)',
+              data: consumed.length > 0 ? consumed : [0],
+              backgroundColor: 'rgba(99, 102, 241, 0.75)',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8' } }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8' },
+              grid: { display: false }
+            },
+            y: {
+              ticks: { color: '#94a3b8' },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderHistoryTable(history) {
+      const tbody = document.getElementById('historyTableBody');
+      if (!history || history.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No entries logged yet. Record your first log above!</td></tr>`;
+        return;
+      }
+
+      // Sort descending for table
+      const sorted = [...history].reverse();
+      let html = '';
+      sorted.forEach(row => {
+        html += `
+          <tr>
+            <td style="font-weight: 600; color: #f8fafc;">${row.logDate}</td>
+            <td style="color: #10b981; font-weight: 600;">${row.weightKg ? row.weightKg + ' kg' : '--'}</td>
+            <td style="color: #818cf8;">${row.caloriesConsumed ? Math.round(row.caloriesConsumed) + ' kcal' : '0 kcal'}</td>
+            <td style="color: #f87171;">${row.caloriesBurned ? Math.round(row.caloriesBurned) + ' kcal' : '0 kcal'}</td>
+            <td style="color: #38bdf8;">${row.waterConsumedMl ? row.waterConsumedMl + ' ml' : '0 ml'}</td>
+            <td>${row.sleepHours ? row.sleepHours + ' hrs' : '--'}</td>
+            <td>${row.stepsCount ? row.stepsCount.toLocaleString() : '--'}</td>
+            <td>
+              <span class="badge" style="background: ${row.workoutCompleted ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)'}; color: ${row.workoutCompleted ? '#10b981' : '#94a3b8'};">
+                ${row.workoutCompleted ? '<i class="fa-solid fa-check"></i> Done' : 'No'}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    async function handleProgressSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveProgressBtn');
+      btn.disabled = true;
+
+      const payload = {
+        logDate: document.getElementById('logDate').value,
+        weightKg: document.getElementById('weightKg').value ? parseFloat(document.getElementById('weightKg').value) : null,
+        sleepHours: document.getElementById('sleepHours').value ? parseFloat(document.getElementById('sleepHours').value) : null,
+        stepsCount: document.getElementById('stepsCount').value ? parseInt(document.getElementById('stepsCount').value) : null,
+        notes: document.getElementById('notes').value || null
+      };
+
+      try {
+        const res = await apiFetch('/api/progress', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        if (!res.success) throw new Error(res.message);
+
+        showToast('Daily stats recorded! Metrics updated.', 'success');
+        await loadProgressData();
+      } catch (err) {
+        showToast(err.message || 'Error saving progress', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

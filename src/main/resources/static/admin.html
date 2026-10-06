@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Panel — PulseFit</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .stat-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .admin-table th {
+      text-align: left;
+      padding: 0.85rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-table td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.92rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <a href="/dashboard.html" class="brand">
+      <i class="fa-solid fa-bolt-lightning"></i> PulseFit <span class="brand-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">ADMIN</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="btn btn-outline"><i class="fa-solid fa-gauge-high"></i> User Dashboard</a>
+      <a href="/profile.html" class="btn btn-outline"><i class="fa-solid fa-user"></i> Profile</a>
+      <button onclick="logout()" class="btn btn-outline" style="color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
+    </nav>
+  </header>
+
+  <main class="admin-container">
+
+    <div style="margin-bottom: 2rem;">
+      <h1 style="font-size: 2rem; font-weight: 800;"><i class="fa-solid fa-shield-halved" style="color: #fbbf24;"></i> System Control Center</h1>
+      <p style="color: var(--text-muted); margin-top: 0.25rem;">Monitor application statistics, manage registered users, and enforce account statuses</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-val" id="statUsers" style="color: #818cf8;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Users</div>
+        <div class="stat-val" id="statActiveUsers" style="color: #10b981;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Workouts Logged</div>
+        <div class="stat-val" id="statWorkouts" style="color: #f87171;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Exercise Library</div>
+        <div class="stat-val" id="statExercises" style="color: #06b6d4;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Indian Foods</div>
+        <div class="stat-val" id="statFoods" style="color: #fbbf24;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Goals Tracked</div>
+        <div class="stat-val" id="statGoals" style="color: #c084fc;">0</div>
+      </div>
+    </div>
+
+    <!-- User Management Table -->
+    <div class="card" style="background: var(--glass); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.75rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700;">
+          <i class="fa-solid fa-users-gear" style="color: #818cf8; margin-right: 0.5rem;"></i> Registered Users Management
+        </h3>
+        <button onclick="loadAdminData()" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Fitness Goal</th>
+              <th>Status</th>
+              <th>Joined Date</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading users...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!isAuthenticated()) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const user = getUser();
+      if (!user || user.role !== 'ROLE_ADMIN') {
+        alert('Access Denied: Administrator role required.');
+        window.location.href = '/dashboard.html';
+        return;
+      }
+
+      await loadAdminData();
+    });
+
+    async function loadAdminData() {
+      await Promise.all([loadStats(), loadUsers()]);
+    }
+
+    async function loadStats() {
+      try {
+        const res = await apiFetch('/api/admin/stats');
+        if (!res.success) throw new Error(res.message);
+
+        const s = res.data;
+        document.getElementById('statUsers').textContent = s.totalUsers;
+        document.getElementById('statActiveUsers').textContent = s.activeUsers;
+        document.getElementById('statWorkouts').textContent = s.totalWorkoutsLogged;
+        document.getElementById('statExercises').textContent = s.totalExercises;
+        document.getElementById('statFoods').textContent = s.totalFoods;
+        document.getElementById('statGoals').textContent = s.totalGoalsTracked;
+      } catch (err) {
+        showToast(err.message || 'Error loading system stats', 'error');
+      }
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      try {
+        const res = await apiFetch('/api/admin/users');
+        if (!res.success) throw new Error(res.message);
+
+        const users = res.data || [];
+        const currentUser = getUser();
+
+        if (users.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No users found.</td></tr>`;
+          return;
+        }
+
+        let html = '';
+        users.forEach(u => {
+          const isCurrent = currentUser && currentUser.id === u.id;
+          const roleBadgeColor = u.role === 'ROLE_ADMIN' ? '#fbbf24' : '#818cf8';
+          const roleBadgeBg = u.role === 'ROLE_ADMIN' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(99, 102, 241, 0.15)';
+          const goalDisplay = u.profile && u.profile.fitnessGoal ? u.profile.fitnessGoal : 'Not Configured';
+          const joinedDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A';
+
+          html += `
+            <tr>
+              <td style="color: var(--text-muted);">#${u.id}</td>
+              <td style="font-weight: 700; color: #fff;">${u.fullName} ${isCurrent ? '<span style="font-size: 0.72rem; color: #38bdf8;">(You)</span>' : ''}</td>
+              <td>${u.email}</td>
+              <td>
+                <span class="badge" style="background: ${roleBadgeBg}; color: ${roleBadgeColor}; font-size: 0.78rem;">
+                  ${u.role}
+                </span>
+              </td>
+              <td style="color: var(--text-muted); font-size: 0.88rem;">${goalDisplay}</td>
+              <td>
+                <span class="badge" style="background: ${u.active ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}; color: ${u.active ? '#10b981' : '#f87171'}; font-size: 0.78rem;">
+                  ${u.active ? 'Active' : 'Disabled'}
+                </span>
+              </td>
+              <td style="color: var(--text-muted); font-size: 0.85rem;">${joinedDate}</td>
+              <td style="text-align: right;">
+                ${isCurrent ? '<span style="color: var(--text-muted); font-size: 0.8rem;">Current Account</span>' : `
+                  <button onclick="toggleUser(${u.id}, ${u.active})" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.82rem; color: ${u.active ? '#f87171' : '#10b981'}; border-color: ${u.active ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'};">
+                    <i class="fa-solid ${u.active ? 'fa-ban' : 'fa-check'}"></i> ${u.active ? 'Disable' : 'Enable'}
+                  </button>
+                `}
+              </td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #f87171; padding: 2rem;">Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    async function toggleUser(userId, currentActive) {
+      const action = currentActive ? 'disable' : 'enable';
+      if (!confirm(`Are you sure you want to ${action} this user account?`)) return;
+
+      try {
+        const res = await apiFetch(`/api/admin/users/${userId}/toggle`, {
+          method: 'PATCH'
+        });
+        if (!res.success) throw new Error(res.message);
+
+        showToast(res.message, 'success');
+        await loadAdminData();
+      } catch (err) {
+        showToast(err.message || 'Error updating user status', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
